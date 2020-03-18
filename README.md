@@ -5,5 +5,5 @@
 Based on the [this COVID-19 dataset](https://github.com/pcm-dpc/COVID-19) this is a simple MATLAB 
 live script to analyze the data.
 
-Click [here](.covid19-live-script.md) for a quick view of the livescript content.
+Click [here](./covid19-live-script.md) for a quick view of the livescript content.
 

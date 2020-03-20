@@ -10,7 +10,7 @@ function [fitresult, gof] = logisticFit(x, y)
     opts.Robust = 'Off';
 
     opts.Lower = [0 0 0];
-    opts.StartPoint = [0.913375856139019 0.63235924622541 0.0975404049994095];
+    opts.StartPoint = [max(y)*2 0.63235924622541 0.0975404049994095];
 
     % Fit model to data.
     [fitresult, gof] = fit( xData, yData, ft, opts );

@@ -1,224 +1,54 @@
-# COVID-19 spread
-# Data
-```matlab
-breakdown = true;
-if breakdown
-    regione="Abruzzo";
-    data_location = urlwrite("https://raw.githubusercontent.com/pcm-dpc/COVID-19/master/dati-regioni/dpc-covid19-ita-regioni.csv","./dati.csv") ;
-else
-    data_location = urlwrite("https://raw.githubusercontent.com/pcm-dpc/COVID-19/master/dati-andamento-nazionale/dpc-covid19-ita-andamento-nazionale.csv","./dati.csv") ;
-end
+\matlabtitle{COVID-19 spread}
+\matlabheading{Data}
+data totale casi =========== ===========
 
-dati=readtable(data_location);
-delete dati.csv
+2020-02-24 229 2020-02-25 322 2020-02-26 400 2020-02-27 650 2020-02-28
+888 2020-02-29 1128 2020-03-01 1694 2020-03-02 2036 2020-03-03 2502
+2020-03-04 3089 2020-03-05 3858 2020-03-06 4636 2020-03-07 5883
+2020-03-08 7375 2020-03-09 9172 2020-03-10 10149 2020-03-11 12462
+2020-03-12 15113 2020-03-13 17660 2020-03-14 21157 2020-03-15 24747
+2020-03-16 27980 2020-03-17 31506 2020-03-18 35713 2020-03-19 41035
+2020-03-20 47021 2020-03-21 53578 2020-03-22 59138
 
-if breakdown
-    dati = dati(dati.denominazione_regione==regione, :);
-end
-dati = dati(:,{'data','totale_casi'});
-dati.data = datetime(dati.data,"Format","uuuu-MM-dd'T'HH:mm:ss");
+\matlabheading{Data fitting}
+\matlabheading{Plotting}
+\matlabheadingtwo{Linear fitting}
+![image](figure_0.png){width="\maxwidth{139.98996487706975em}"}
 
-disp(dati)
-```
-```
-           data            totale_casi
-    ___________________    ___________
+Correlation of the derivative with actual icreases: 5.2893e-17
 
-    2020-02-24T18:00:00          0    
-    2020-02-25T18:00:00          0    
-    2020-02-26T18:00:00          0    
-    2020-02-27T18:00:00          1    
-    2020-02-28T18:00:00          1    
-    2020-02-29T17:00:00          2    
-    2020-03-01T17:00:00          5    
-    2020-03-02T18:00:00          5    
-    2020-03-03T18:00:00          6    
-    2020-03-04T17:00:00          7    
-    2020-03-05T17:00:00          8    
-    2020-03-06T17:00:00          9    
-    2020-03-07T18:00:00         11    
-    2020-03-08T18:00:00         17    
-    2020-03-09T18:00:00         30    
-    2020-03-10T18:00:00         38    
-    2020-03-11T17:00:00         38    
-    2020-03-12T17:00:00         84    
-    2020-03-13T17:00:00         89    
-    2020-03-14T17:00:00        112    
-    2020-03-15T17:00:00        137    
-    2020-03-16T17:00:00        176    
-    2020-03-17T17:00:00        229    
-```
-```matlab
-confirmed_cases = dati.totale_casi;
-day_num = datenum(dati.data - dati.data(1));
-CURRENT = day_num(end);
-```
-# Data fitting
-```matlab
-[linfit, lin_r] = fit(day_num, confirmed_cases, 'poly1');
-[expfit, exp_r] = fit(day_num, confirmed_cases, 'exp1');
-[logfit, log_r] = logisticFit(day_num, confirmed_cases);
-```
-# Plotting
-## Linear fitting
-```matlab
-plot(linfit, day_num, confirmed_cases, "o")
-grid on
+P-value: 1
 
-title("Linear fit, Rüü="+lin_r.rsquare)
-ylabel("Contagi")
-xlabel("Giorni")
-```
+Predicted total confirmed cases tomorrow: 44242
 
-![figure_0.png](covid19-live-script_images/figure_0.png)
+There are, on average, 1964.6412 new cases each day.
 
-```matlab
+\matlabheadingtwo{Exponential fitting}
+![image](figure_1.png){width="\maxwidth{139.98996487706975em}"}
 
-disp(linfit.p1+" nuovi contagi ogni giorno")
-```
-```
-7.818 nuovi contagi ogni giorno
-```
-```matlab
-disp("Predicted new cases for tomorrow: "+round(linfit(CURRENT+1)-confirmed_cases(end)))
-```
-```
-Predicted new cases for tomorrow: -92
-```
-## Exponential fitting
-```matlab
-plot(expfit, day_num, confirmed_cases, "o")
-grid on
+Correlation of the derivative with actual icreases: 0.9646
 
-title("Exponential fit, Rüü="+exp_r.rsquare)
-ylabel("Contagi")
-xlabel("Giorni")
-```
+P-value: 1.4245e-16
 
-![figure_1.png](covid19-live-script_images/figure_1.png)
++14.4053
 
-```matlab
+Predicted total confirmed cases tomorrow: 71622
 
-disp("+"+expfit.b*100+"% nuovi contagi ogni giorno")
-```
-```
-+25.3966% nuovi contagi ogni giorno
-```
-```matlab
-disp("Predicted new cases for tomorrow: "+round(expfit(CURRENT+1)-confirmed_cases(end)))
-```
-```
-Predicted new cases for tomorrow: 68
-```
-# Logistic fitting
-```matlab
-plot(logfit, day_num, confirmed_cases, "o")
-grid on
+Predicted new cases for tomorrow: 10317
 
-title("Logistic fit, Rüü="+log_r.rsquare)
-ylabel("Contagi")
-xlabel("Giorni")
-```
+\matlabheading{Three parameters logistic fitting}
+![image](figure_2.png){width="\maxwidth{139.98996487706975em}"}
 
-![figure_2.png](covid19-live-script_images/figure_2.png)
+Correlation of the derivative with actual icreases: 0.98037
 
-```matlab
-variation=round(predint(logfit,CURRENT+1,0.95)-confirmed_cases(end));
-disp("Predicted new cases for tomorrow: "+round(logfit(CURRENT+1)-confirmed_cases(end)));
-```
-```
-Predicted new cases for tomorrow: 18
-```
-```matlab
-disp("                                         95% confidence in range ["+variation(1) + " - "+ variation(2)+"]");
-```
-```
-                                         95% confidence in range [2 - 34]
-```
-```matlab
+P-value: 7.3014e-20
 
-```
-# Future projections
-```matlab
-look_ahead_days = 7;
-compare=false;
-error_bars=true;
+Predicted total confirmed cases tomorrow: 64645
 
-plot(0:(CURRENT+look_ahead_days),logfit(0:(CURRENT+look_ahead_days)))
-hold on
+Predicted increase in cases tomorrow: 5831
 
-grid on
-grid minor
-title("Future projection assuming logistic behaviour")
-ylabel("Contagi")
-xlabel("Giorni")
-scatter(day_num,confirmed_cases)
+\matlabheading{Future projections}
+![image](figure_3.png){width="\maxwidth{139.98996487706975em}"}
 
-legend({'Logistic growth','Data points'}, "Location","best");
-
-if compare
-    plot(0:(CURRENT+look_ahead_days),expfit(0:(CURRENT+look_ahead_days)))
-    title("Future projection logistic vs exponential")
-    legend({'Logistic growth','Data points', 'Exponential growth'}, "Location","best");
-end
-if error_bars
-    log_ci = predint(logfit,1:(CURRENT+look_ahead_days),0.95);
-    plot(1:(CURRENT+look_ahead_days),log_ci,'LineWidth',0.001);
-    legend({'Logistic growth','Data points','Lower bound','Upper bound'}, "Location","best");
-
-end
-hold off
-```
-
-![figure_3.png](covid19-live-script_images/figure_3.png)
-
-```matlab
-
-```
-# Confronto col passato:
-```matlab
-look_ahead_days = 1;
-look_behind_days = 2;
-
-model="Logistic";
-
-reduced_day=day_num(1:(end-look_behind_days));
-reduced_cases=confirmed_cases(1:(end-look_behind_days));
-
-if model == "Logistic"
-    model_current = logfit;
-    model_past = logisticFit(reduced_day, reduced_cases );
-else
-    model_current = expfit;
-    model_past = fit(reduced_day, reduced_cases, 'exp1');
-end
-
-plot(0:(CURRENT+look_ahead_days),model_current(0:(CURRENT+look_ahead_days)))
-grid minor
-hold on
-plot(0:(CURRENT+look_ahead_days),model_past(0:(CURRENT+look_ahead_days)))
-scatter(day_num, confirmed_cases)
-title("Comparison with the projection "+look_behind_days+" days ago");
-legend({'Current projection','Past projection','Data points'}, "Location","best");
-hold off
-```
-
-![figure_4.png](covid19-live-script_images/figure_4.png)
-
-```matlab
-
-semilogy(0:(CURRENT+look_ahead_days),model_current(0:(CURRENT+look_ahead_days)))
-grid minor
-hold on
-semilogy(0:(CURRENT+look_ahead_days),model_past(0:(CURRENT+look_ahead_days)))
-scatter(day_num, confirmed_cases)
-title("Comparison with the projection "+look_behind_days+" days ago");
-legend({'Current projection','Past projection','Data points'}, "Location","best");
-hold off
-```
-
-![figure_5.png](covid19-live-script_images/figure_5.png)
-
-```matlab
-
-```
+\matlabheading{Comparison with past projections:}
+![image](figure_4.png){width="\maxwidth{139.98996487706975em}"}

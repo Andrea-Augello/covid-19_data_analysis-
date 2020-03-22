@@ -217,7 +217,6 @@ legend({'Current projection','Past projection','Data points'}, "Location","best"
 hold off
 ```
 
-![figure_5.png](covid19-live-script_images/figure_5.png)
 
 ```matlab
 
